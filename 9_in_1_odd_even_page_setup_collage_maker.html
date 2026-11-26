@@ -1,0 +1,1942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>9-in-1 Odd/Even Page Setup &amp; Collage Maker</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- PDF-lib for print-ready vector PDF creation -->
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+
+  <!-- PDF.js for crisp live PDF page rendering -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+  <style>
+    /* Clean custom scrollbar and range slider polish */
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+    input[type="range"] {
+      accent-color: #4f46e5;
+    }
+    .sheet-shadow {
+      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 4px 10px -4px rgba(15, 23, 42, 0.05);
+    }
+    /* Custom subtle scrollbar for desktop sidebar */
+    .thin-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .thin-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .thin-scroll::-webkit-scrollbar-thumb {
+      background-color: rgba(148, 163, 184, 0.45);
+      border-radius: 9999px;
+    }
+    .thin-scroll::-webkit-scrollbar-thumb:hover {
+      background-color: rgba(100, 116, 139, 0.65);
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
+
+  <!-- ==================== TOP NAVIGATION BAR ==================== -->
+  <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80">
+    <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+      <!-- Brand Logo & Title -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-teal-500 flex items-center justify-center text-white shadow-sm shrink-0">
+          <!-- 3x3 Grid SVG Icon -->
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="5" height="5" rx="1"></rect>
+            <rect x="9.5" y="3" width="5" height="5" rx="1"></rect>
+            <rect x="16" y="3" width="5" height="5" rx="1"></rect>
+            <rect x="3" y="9.5" width="5" height="5" rx="1"></rect>
+            <rect x="9.5" y="9.5" width="5" height="5" rx="1"></rect>
+            <rect x="16" y="9.5" width="5" height="5" rx="1"></rect>
+            <rect x="3" y="16" width="5" height="5" rx="1"></rect>
+            <rect x="9.5" y="16" width="5" height="5" rx="1"></rect>
+            <rect x="16" y="16" width="5" height="5" rx="1"></rect>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-base sm:text-lg font-bold text-slate-900 leading-tight">
+            9-in-1 Odd/Even Page Setup
+          </h1>
+          <p class="text-xs text-slate-500 hidden sm:block">
+            3×3 Collage Maker &amp; Duplex Print-Ready A4 PDF Generator
+          </p>
+        </div>
+      </div>
+
+      <!-- Quick Header Actions -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <button
+          id="headerDemoBtn"
+          type="button"
+          class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/70 transition cursor-pointer"
+        >
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+          </svg>
+          <span>Load Demo (18 Pages)</span>
+        </button>
+
+        <button
+          id="headerDownloadBtn"
+          type="button"
+          disabled
+          class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-45 disabled:cursor-not-allowed shadow-sm transition cursor-pointer"
+        >
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+          </svg>
+          <span class="hidden xs:inline sm:inline">Download PDF</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN WORKSPACE ==================== -->
+  <main class="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 py-5 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+    <!-- ==================== LEFT SIDEBAR: CONTROLS ==================== -->
+    <aside class="lg:col-span-4 xl:col-span-3 space-y-4 lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto thin-scroll pb-4">
+
+      <!-- 1. INPUT SOURCE CARD -->
+      <section class="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-sm space-y-3">
+        <div class="flex items-center justify-between">
+          <h2 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <span class="w-5 h-5 rounded-md bg-indigo-100 text-indigo-700 text-xs font-extrabold inline-flex items-center justify-center">1</span>
+            Input Pages
+          </h2>
+          <button
+            id="clearFilesBtn"
+            type="button"
+            class="hidden text-xs font-medium text-rose-600 hover:text-rose-700 hover:underline cursor-pointer"
+          >
+            Clear All
+          </button>
+        </div>
+
+        <!-- Drag & Drop Zone -->
+        <div
+          id="dropZone"
+          role="button"
+          tabindex="0"
+          class="group relative rounded-xl border-2 border-dashed border-slate-300 hover:border-indigo-400 hover:bg-indigo-50/40 transition p-4 text-center cursor-pointer"
+        >
+          <input
+            id="fileInput"
+            type="file"
+            accept="application/pdf,image/jpeg,image/png,image/webp"
+            multiple
+            class="hidden"
+          />
+          <div class="mx-auto w-10 h-10 rounded-full bg-slate-100 group-hover:bg-indigo-100 text-slate-500 group-hover:text-indigo-600 flex items-center justify-center transition mb-2">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
+            </svg>
+          </div>
+          <p class="text-xs sm:text-sm font-semibold text-slate-700">
+            Drop a PDF or Multiple Images
+          </p>
+          <p class="text-[11px] text-slate-500 mt-0.5">
+            Supports 1 PDF or JPG / PNG / WebP files
+          </p>
+        </div>
+
+        <!-- Loaded Source Status Pill -->
+        <div id="sourceStatusBox" class="hidden rounded-xl bg-slate-50 border border-slate-200 p-3 flex items-center justify-between gap-2">
+          <div class="min-w-0">
+            <p id="sourceFileName" class="text-xs font-bold text-slate-800 truncate">demo-18-pages</p>
+            <p id="sourceMeta" class="text-[11px] text-slate-500 mt-0.5">18 pages loaded • Vector / Demo</p>
+          </div>
+          <span id="sourceBadge" class="shrink-0 px-2 py-1 rounded-lg text-[11px] font-bold bg-indigo-100 text-indigo-700">
+            18 pgs
+          </span>
+        </div>
+
+        <!-- Load Demo Button (Sidebar) -->
+        <button
+          id="sidebarDemoBtn"
+          type="button"
+          class="w-full py-2.5 px-3 rounded-xl text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/80 transition flex items-center justify-center gap-2 cursor-pointer"
+        >
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+          </svg>
+          Load Demo (18 Sample Pages)
+        </button>
+      </section>
+
+      <!-- 2. LAYOUT & ODD-EVEN MODES CARD -->
+      <section class="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-sm space-y-4">
+        <h2 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+          <span class="w-5 h-5 rounded-md bg-indigo-100 text-indigo-700 text-xs font-extrabold inline-flex items-center justify-center">2</span>
+          Grid &amp; Odd-Even Mode
+        </h2>
+
+        <!-- Grid Selector -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1.5">Pages Per Sheet (Grid)</label>
+          <div class="grid grid-cols-3 gap-2" id="gridSelector">
+            <button type="button" data-grid="2x2" class="grid-btn py-2 px-2 rounded-xl border text-xs font-semibold transition cursor-pointer">
+              2×2 <span class="block text-[10px] font-normal opacity-75">4 pages</span>
+            </button>
+            <button type="button" data-grid="3x3" class="grid-btn py-2 px-2 rounded-xl border text-xs font-semibold transition cursor-pointer">
+              3×3 <span class="block text-[10px] font-normal opacity-75">9 pages</span>
+            </button>
+            <button type="button" data-grid="3x4" class="grid-btn py-2 px-2 rounded-xl border text-xs font-semibold transition cursor-pointer">
+              3×4 <span class="block text-[10px] font-normal opacity-75">12 pages</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Odd-Even Mode Selector -->
+        <div>
+          <label for="modeSelect" class="block text-xs font-semibold text-slate-600 mb-1.5">Odd-Even Arrangement Mode</label>
+          <select
+            id="modeSelect"
+            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-xs font-semibold text-slate-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none cursor-pointer"
+          >
+            <option value="duplex-alternating">Duplex Front/Back (Odd &amp; Even Alternating)</option>
+            <option value="manual-duplex">Manual Duplex (All Odd First, Then All Even)</option>
+            <option value="odd-only">Odd Pages Only (9 per sheet)</option>
+            <option value="even-only">Even Pages Only (9 per sheet)</option>
+            <option value="sequential">Standard Sequential (1–9, 10–18)</option>
+          </select>
+          <p id="modeDescription" class="mt-2 text-[11px] leading-relaxed text-slate-600 bg-slate-50 rounded-xl p-2.5 border border-slate-200/70">
+            Pairs every 18 pages into 2 sheets: Front (Odd: 1,3,5...) and Back (Even: 6,4,2...) so Page 2 aligns directly behind Page 1 when flipped.
+          </p>
+        </div>
+
+        <!-- Mirror Back / Flip Alignment -->
+        <div id="mirrorControlGroup" class="space-y-2 pt-1 border-t border-slate-100">
+          <label class="block text-xs font-semibold text-slate-600">Back Sheet Mirroring (Even Sheets)</label>
+          <div class="space-y-1.5">
+            <label class="flex items-start gap-2.5 p-2 rounded-xl border border-slate-200/80 hover:bg-slate-50 cursor-pointer transition">
+              <input type="radio" name="mirrorMode" value="horizontal" checked class="mt-0.5 accent-teal-600" />
+              <span class="text-xs">
+                <span class="font-semibold text-slate-800 block">Mirror Horizontally (Long-Edge Flip)</span>
+                <span class="text-[11px] text-slate-500">Rows become [6, 4, 2] — standard book flip</span>
+              </span>
+            </label>
+            <label class="flex items-start gap-2.5 p-2 rounded-xl border border-slate-200/80 hover:bg-slate-50 cursor-pointer transition">
+              <input type="radio" name="mirrorMode" value="vertical" class="mt-0.5 accent-teal-600" />
+              <span class="text-xs">
+                <span class="font-semibold text-slate-800 block">Mirror Vertically (Short-Edge Flip)</span>
+                <span class="text-[11px] text-slate-500">Flips rows top-to-bottom for calendar flip</span>
+              </span>
+            </label>
+            <label class="flex items-start gap-2.5 p-2 rounded-xl border border-slate-200/80 hover:bg-slate-50 cursor-pointer transition">
+              <input type="radio" name="mirrorMode" value="none" class="mt-0.5 accent-slate-600" />
+              <span class="text-xs">
+                <span class="font-semibold text-slate-800 block">No Mirroring</span>
+                <span class="text-[11px] text-slate-500">Keep even pages left-to-right [2, 4, 6]</span>
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Manual Duplex Extra Toggle -->
+        <div id="reverseEvenWrapper" class="hidden pt-2 border-t border-slate-100">
+          <label class="flex items-start gap-2.5 p-2.5 rounded-xl bg-amber-50/70 border border-amber-200/80 cursor-pointer">
+            <input id="reverseEvenCheckbox" type="checkbox" class="mt-0.5 w-4 h-4 rounded accent-amber-600" />
+            <span class="text-xs">
+              <span class="font-semibold text-amber-900 block">Reverse Even Sheet Order</span>
+              <span class="text-[11px] text-amber-800/80">Prints last Even sheet first for easy re-feeding into single-sided printers</span>
+            </span>
+          </label>
+        </div>
+      </section>
+
+      <!-- 3. PAGE SETUP & PRINT OPTIONS CARD -->
+      <section class="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-sm space-y-4">
+        <h2 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+          <span class="w-5 h-5 rounded-md bg-indigo-100 text-indigo-700 text-xs font-extrabold inline-flex items-center justify-center">3</span>
+          Page Setup &amp; Print Controls
+        </h2>
+
+        <!-- Paper Size & Orientation -->
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label for="paperSizeSelect" class="block text-xs font-semibold text-slate-600 mb-1">Paper Size</label>
+            <select id="paperSizeSelect" class="w-full rounded-xl border border-slate-300 bg-white px-2.5 py-2 text-xs font-semibold text-slate-800 outline-none focus:border-indigo-500 cursor-pointer">
+              <option value="a4" selected>A4 (210×297mm)</option>
+              <option value="letter">Letter (216×279mm)</option>
+            </select>
+          </div>
+          <div>
+            <label for="orientationSelect" class="block text-xs font-semibold text-slate-600 mb-1">Orientation</label>
+            <select id="orientationSelect" class="w-full rounded-xl border border-slate-300 bg-white px-2.5 py-2 text-xs font-semibold text-slate-800 outline-none focus:border-indigo-500 cursor-pointer">
+              <option value="portrait" selected>Portrait</option>
+              <option value="landscape">Landscape</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Margin & Cell Gap Sliders -->
+        <div class="space-y-3">
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span class="font-semibold text-slate-600">Page Margin</span>
+              <span id="marginValue" class="font-bold text-indigo-600">5 mm</span>
+            </div>
+            <input id="marginSlider" type="range" min="0" max="20" step="1" value="5" class="w-full cursor-pointer" />
+          </div>
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span class="font-semibold text-slate-600">Cell Gap</span>
+              <span id="gapValue" class="font-bold text-indigo-600">2 mm</span>
+            </div>
+            <input id="gapSlider" type="range" min="0" max="12" step="0.5" value="2" class="w-full cursor-pointer" />
+          </div>
+        </div>
+
+        <!-- Fit Mode Toggle -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1.5">Page Scaling</label>
+          <div class="grid grid-cols-2 gap-2">
+            <button type="button" data-fit="contain" class="fit-btn py-2 px-2.5 rounded-xl border text-xs font-semibold transition cursor-pointer">
+              Fit Inside Cell
+            </button>
+            <button type="button" data-fit="cover" class="fit-btn py-2 px-2.5 rounded-xl border text-xs font-semibold transition cursor-pointer">
+              Fill Cell (Crop)
+            </button>
+          </div>
+        </div>
+
+        <!-- Checkboxes -->
+        <div class="space-y-2 pt-1 border-t border-slate-100">
+          <label class="flex items-center gap-2.5 cursor-pointer py-1">
+            <input id="cutLinesCheckbox" type="checkbox" checked class="w-4 h-4 rounded accent-indigo-600" />
+            <span class="text-xs font-medium text-slate-700">Show Dashed Cut Lines / Grid Borders</span>
+          </label>
+          <label class="flex items-center gap-2.5 cursor-pointer py-1">
+            <input id="previewBadgeCheckbox" type="checkbox" checked class="w-4 h-4 rounded accent-indigo-600" />
+            <span class="text-xs font-medium text-slate-700">Show Page Number Badge <span class="text-slate-400">(preview only)</span></span>
+          </label>
+        </div>
+      </section>
+
+      <!-- 4. EXPORT PDF CARD -->
+      <section class="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-sm space-y-2.5">
+        <h2 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+          <span class="w-5 h-5 rounded-md bg-teal-100 text-teal-700 text-xs font-extrabold inline-flex items-center justify-center">4</span>
+          Export Print-Ready PDF
+        </h2>
+
+        <button
+          id="exportFullBtn"
+          type="button"
+          disabled
+          class="w-full py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-45 disabled:cursor-not-allowed shadow-sm transition flex items-center justify-center gap-2 cursor-pointer"
+        >
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+          </svg>
+          Download Full PDF
+        </button>
+
+        <div class="grid grid-cols-2 gap-2">
+          <button
+            id="exportOddBtn"
+            type="button"
+            disabled
+            class="py-2.5 px-2.5 rounded-xl text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center justify-center gap-1.5 cursor-pointer"
+          >
+            <span>Odd Sheets PDF</span>
+          </button>
+          <button
+            id="exportEvenBtn"
+            type="button"
+            disabled
+            class="py-2.5 px-2.5 rounded-xl text-xs font-semibold text-teal-700 bg-teal-50 hover:bg-teal-100 border border-teal-200 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center justify-center gap-1.5 cursor-pointer"
+          >
+            <span>Even Sheets PDF</span>
+          </button>
+        </div>
+
+        <p class="text-[11px] text-slate-500 text-center">
+          PDF inputs preserve <strong>100% vector quality</strong> &amp; crisp text.
+        </p>
+      </section>
+    </aside>
+
+    <!-- ==================== RIGHT AREA: LIVE SHEET PREVIEW ==================== -->
+    <section class="lg:col-span-8 xl:col-span-9 space-y-4 min-w-0">
+
+      <!-- COLLAPSIBLE "HOW ODD-EVEN DUPLEX WORKS" MINI-DIAGRAM -->
+      <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
+        <button
+          id="toggleGuideBtn"
+          type="button"
+          class="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-slate-50/70 transition cursor-pointer"
+        >
+          <div class="flex items-center gap-2.5">
+            <span class="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-100 to-teal-100 text-indigo-700 flex items-center justify-center shrink-0">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+              </svg>
+            </span>
+            <div>
+              <span class="text-xs sm:text-sm font-bold text-slate-800 block">How Odd-Even 9-in-1 Duplex Alignment Works</span>
+              <span class="text-[11px] text-slate-500 hidden sm:block">Why mirroring Even rows ensures Page 2 lands directly behind Page 1 when cut</span>
+            </div>
+          </div>
+          <svg id="guideChevron" class="w-4 h-4 text-slate-500 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+          </svg>
+        </button>
+
+        <div id="guideContent" class="hidden px-4 pb-4 pt-1 border-t border-slate-100 bg-slate-50/50">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center pt-2">
+            <!-- Front Sheet Diagram -->
+            <div class="bg-white rounded-xl border border-indigo-200 p-3">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-bold text-indigo-700 uppercase tracking-wide">Sheet 1 • ODD (Front)</span>
+                <span class="text-[10px] text-slate-400">Left → Right</span>
+              </div>
+              <div class="grid grid-cols-3 gap-1.5 text-center font-bold text-xs">
+                <div class="py-2 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-800">P1</div>
+                <div class="py-2 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-800">P3</div>
+                <div class="py-2 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-800">P5</div>
+                <div class="py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-500 text-[11px]">P7</div>
+                <div class="py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-500 text-[11px]">P9</div>
+                <div class="py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-500 text-[11px]">P11</div>
+              </div>
+            </div>
+
+            <!-- Flip Arrow Center -->
+            <div class="text-center space-y-1.5 py-1">
+              <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-50 border border-teal-200 text-teal-800 text-[11px] font-bold">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+                </svg>
+                Flip on Long Edge
+              </div>
+              <p class="text-[11px] text-slate-600 leading-relaxed max-w-[230px] mx-auto">
+                When printed double-sided and cut into 9 cards:
+                <strong class="text-indigo-700">P1</strong> backs onto <strong class="text-teal-700">P2</strong>,
+                <strong class="text-indigo-700">P3</strong> backs onto <strong class="text-teal-700">P4</strong>,
+                <strong class="text-indigo-700">P5</strong> backs onto <strong class="text-teal-700">P6</strong>!
+              </p>
+            </div>
+
+            <!-- Back Sheet Diagram -->
+            <div class="bg-white rounded-xl border border-teal-200 p-3">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-bold text-teal-700 uppercase tracking-wide">Sheet 2 • EVEN (Mirrored)</span>
+                <span class="text-[10px] text-teal-600 font-semibold">Right ← Left</span>
+              </div>
+              <div class="grid grid-cols-3 gap-1.5 text-center font-bold text-xs">
+                <div class="py-2 rounded-lg bg-teal-50 border border-teal-200 text-teal-800">P6 <span class="block text-[9px] font-normal text-teal-600">back of P5</span></div>
+                <div class="py-2 rounded-lg bg-teal-50 border border-teal-200 text-teal-800">P4 <span class="block text-[9px] font-normal text-teal-600">back of P3</span></div>
+                <div class="py-2 rounded-lg bg-teal-50 border border-teal-200 text-teal-800">P2 <span class="block text-[9px] font-normal text-teal-600">back of P1</span></div>
+                <div class="py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-500 text-[11px]">P12</div>
+                <div class="py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-500 text-[11px]">P10</div>
+                <div class="py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-500 text-[11px]">P8</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUMMARY STATS & PREVIEW FILTER BAR -->
+      <div id="previewToolbar" class="hidden bg-white rounded-2xl border border-slate-200/90 px-4 py-3 shadow-sm flex flex-wrap items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-2 text-xs">
+          <span class="font-bold text-slate-800">Live Sheet Preview</span>
+          <span class="text-slate-300">|</span>
+          <span id="statSummary" class="text-slate-600 font-medium">18 input pages → 2 output sheets</span>
+          <span id="statOddBadge" class="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 font-semibold border border-indigo-200/70">1 Odd</span>
+          <span id="statEvenBadge" class="px-2 py-0.5 rounded-full bg-teal-50 text-teal-700 font-semibold border border-teal-200/70">1 Even</span>
+        </div>
+
+        <!-- Preview Filter Tabs -->
+        <div class="inline-flex rounded-xl bg-slate-100 p-1 text-xs font-semibold" id="previewFilterTabs">
+          <button type="button" data-filter="all" class="filter-tab px-3 py-1 rounded-lg transition cursor-pointer">All</button>
+          <button type="button" data-filter="odd" class="filter-tab px-3 py-1 rounded-lg transition cursor-pointer">Odd</button>
+          <button type="button" data-filter="even" class="filter-tab px-3 py-1 rounded-lg transition cursor-pointer">Even</button>
+        </div>
+      </div>
+
+      <!-- EMPTY STATE (Before uploading or loading demo) -->
+      <div id="emptyState" class="bg-white rounded-2xl border border-slate-200/90 p-8 sm:p-12 text-center shadow-sm">
+        <div class="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-50 to-teal-50 border border-indigo-100 flex items-center justify-center text-indigo-600 mb-4">
+          <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+          </svg>
+        </div>
+        <h3 class="text-lg font-bold text-slate-900">Ready to Build Your 9-in-1 Odd/Even Layout</h3>
+        <p class="text-sm text-slate-500 max-w-md mx-auto mt-1.5">
+          Upload a PDF document or multiple images from the panel, or load our 18 numbered sample pages to test Duplex Front/Back 3×3 alignment instantly.
+        </p>
+        <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+          <button
+            id="emptyUploadBtn"
+            type="button"
+            class="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm transition cursor-pointer"
+          >
+            Upload PDF or Images
+          </button>
+          <button
+            id="emptyDemoBtn"
+            type="button"
+            class="px-5 py-2.5 rounded-xl text-sm font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 transition cursor-pointer"
+          >
+            Load Demo (18 Sample Pages)
+          </button>
+        </div>
+      </div>
+
+      <!-- LOADING OVERLAY CARD (While parsing PDF/Images) -->
+      <div id="loadingCard" class="hidden bg-white rounded-2xl border border-slate-200/90 p-8 text-center shadow-sm">
+        <div class="mx-auto w-10 h-10 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mb-3"></div>
+        <p id="loadingTitle" class="text-sm font-bold text-slate-800">Processing pages...</p>
+        <p id="loadingSubtitle" class="text-xs text-slate-500 mt-1">Rendering thumbnails for live preview</p>
+        <div class="max-w-xs mx-auto mt-4 h-2 rounded-full bg-slate-100 overflow-hidden">
+          <div id="loadingProgressBar" class="h-full bg-indigo-600 transition-all duration-150" style="width: 10%"></div>
+        </div>
+      </div>
+
+      <!-- SHEETS GRID CONTAINER -->
+      <div id="sheetsContainer" class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <!-- Output Sheet Cards dynamically rendered here -->
+      </div>
+    </section>
+  </main>
+
+  <!-- ==================== FLOATING TOAST NOTIFICATION ==================== -->
+  <div
+    id="toastContainer"
+    class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-[calc(100vw-2rem)] pointer-events-none"
+    aria-live="polite"
+  ></div>
+
+  <!-- ==================== APPLICATION LOGIC ==================== -->
+  <script>
+    (() => {
+      'use strict';
+
+      // Configure PDF.js worker
+      if (window.pdfjsLib) {
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
+          'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      }
+
+      // Constants
+      const MM_TO_PT = 72 / 25.4;
+      const PAPER_SIZES_MM = {
+        a4: { width: 210, height: 297, label: 'A4' },
+        letter: { width: 215.9, height: 279.4, label: 'Letter' },
+      };
+      const GRIDS = {
+        '2x2': { cols: 2, rows: 2, perSheet: 4 },
+        '3x3': { cols: 3, rows: 3, perSheet: 9 },
+        '3x4': { cols: 3, rows: 4, perSheet: 12 },
+      };
+
+      // Mode descriptions for live help text
+      const MODE_DESCRIPTIONS = {
+        'duplex-alternating': (n) =>
+          `Pairs every ${n * 2} pages into 2 sheets: Sheet 1 (Odd Front) & Sheet 2 (Even Back). With Horizontal Mirroring ON, Page 2 aligns directly behind Page 1 when flipped on the long edge.`,
+        'manual-duplex': (n) =>
+          `Outputs ALL Odd ${n}-up sheets first, then ALL Even ${n}-up sheets. Ideal for single-sided printers where you print Odd sheets first and re-feed the stack for Even sheets.`,
+        'odd-only': (n) =>
+          `Extracts only Odd pages (1, 3, 5, 7...) and arranges ${n} per sheet.`,
+        'even-only': (n) =>
+          `Extracts only Even pages (2, 4, 6, 8...) and arranges ${n} per sheet (with optional mirroring to match an Odd-only print).`,
+        'sequential': (n) =>
+          `Standard 1-to-N collage order (1–${n} on Sheet 1, ${n + 1}–${n * 2} on Sheet 2, etc.) without odd/even splitting.`,
+      };
+
+      // Central Application State
+      const state = {
+        sourceType: null, // 'pdf' | 'images' | 'demo' | null
+        fileName: 'collage',
+        pdfBytes: null, // Untouched Uint8Array copy for vector pdf-lib embedding
+        pages: [], // Array of { index: 1..N, width, height, previewUrl, imageBytes?, mimeType?, isDemo? }
+        objectUrls: [], // Tracked for cleanup
+
+        // Layout settings
+        grid: '3x3',
+        mode: 'duplex-alternating',
+        mirrorMode: 'horizontal', // 'horizontal' | 'vertical' | 'none'
+        reverseEvenOrder: false,
+
+        // Page setup settings
+        paperSize: 'a4',
+        orientation: 'portrait',
+        marginMm: 5,
+        gapMm: 2,
+        showCutLines: true,
+        showPreviewBadges: true,
+        fitMode: 'contain', // 'contain' | 'cover'
+
+        // UI state
+        previewFilter: 'all', // 'all' | 'odd' | 'even'
+        isBusy: false,
+      };
+
+      // Cached DOM Elements
+      const dom = {
+        dropZone: document.getElementById('dropZone'),
+        fileInput: document.getElementById('fileInput'),
+        clearFilesBtn: document.getElementById('clearFilesBtn'),
+        sourceStatusBox: document.getElementById('sourceStatusBox'),
+        sourceFileName: document.getElementById('sourceFileName'),
+        sourceMeta: document.getElementById('sourceMeta'),
+        sourceBadge: document.getElementById('sourceBadge'),
+
+        headerDemoBtn: document.getElementById('headerDemoBtn'),
+        sidebarDemoBtn: document.getElementById('sidebarDemoBtn'),
+        emptyDemoBtn: document.getElementById('emptyDemoBtn'),
+        emptyUploadBtn: document.getElementById('emptyUploadBtn'),
+
+        headerDownloadBtn: document.getElementById('headerDownloadBtn'),
+        exportFullBtn: document.getElementById('exportFullBtn'),
+        exportOddBtn: document.getElementById('exportOddBtn'),
+        exportEvenBtn: document.getElementById('exportEvenBtn'),
+
+        gridBtns: document.querySelectorAll('.grid-btn'),
+        modeSelect: document.getElementById('modeSelect'),
+        modeDescription: document.getElementById('modeDescription'),
+        mirrorControlGroup: document.getElementById('mirrorControlGroup'),
+        mirrorRadios: document.querySelectorAll('input[name="mirrorMode"]'),
+        reverseEvenWrapper: document.getElementById('reverseEvenWrapper'),
+        reverseEvenCheckbox: document.getElementById('reverseEvenCheckbox'),
+
+        paperSizeSelect: document.getElementById('paperSizeSelect'),
+        orientationSelect: document.getElementById('orientationSelect'),
+        marginSlider: document.getElementById('marginSlider'),
+        marginValue: document.getElementById('marginValue'),
+        gapSlider: document.getElementById('gapSlider'),
+        gapValue: document.getElementById('gapValue'),
+        fitBtns: document.querySelectorAll('.fit-btn'),
+        cutLinesCheckbox: document.getElementById('cutLinesCheckbox'),
+        previewBadgeCheckbox: document.getElementById('previewBadgeCheckbox'),
+
+        toggleGuideBtn: document.getElementById('toggleGuideBtn'),
+        guideContent: document.getElementById('guideContent'),
+        guideChevron: document.getElementById('guideChevron'),
+
+        previewToolbar: document.getElementById('previewToolbar'),
+        statSummary: document.getElementById('statSummary'),
+        statOddBadge: document.getElementById('statOddBadge'),
+        statEvenBadge: document.getElementById('statEvenBadge'),
+        filterTabs: document.querySelectorAll('.filter-tab'),
+
+        emptyState: document.getElementById('emptyState'),
+        loadingCard: document.getElementById('loadingCard'),
+        loadingTitle: document.getElementById('loadingTitle'),
+        loadingSubtitle: document.getElementById('loadingSubtitle'),
+        loadingProgressBar: document.getElementById('loadingProgressBar'),
+        sheetsContainer: document.getElementById('sheetsContainer'),
+        toastContainer: document.getElementById('toastContainer'),
+      };
+
+      // ==================== TOAST NOTIFICATIONS ====================
+      function showToast(message, type = 'info', duration = 3500) {
+        const colors = {
+          info: 'bg-slate-900 text-white border-slate-700',
+          success: 'bg-emerald-700 text-white border-emerald-600',
+          error: 'bg-rose-600 text-white border-rose-500',
+          loading: 'bg-indigo-700 text-white border-indigo-600',
+        };
+        const toast = document.createElement('div');
+        toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-xl border shadow-lg text-xs sm:text-sm font-medium transition-all duration-200 ${colors[type] || colors.info}`;
+
+        const iconHtml =
+          type === 'loading'
+            ? `<span class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin shrink-0"></span>`
+            : type === 'success'
+            ? `<svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>`
+            : type === 'error'
+            ? `<svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>`
+            : `<svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`;
+
+        toast.innerHTML = `${iconHtml}<span class="leading-snug">${escapeHtml(message)}</span>`;
+        dom.toastContainer.appendChild(toast);
+
+        if (duration > 0) {
+          setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(8px)';
+            setTimeout(() => toast.remove(), 220);
+          }, duration);
+        }
+        return toast;
+      }
+
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      // ==================== LOADING INDICATOR ====================
+      function setLoading(isLoading, title = 'Processing...', subtitle = '', percent = 15) {
+        state.isBusy = isLoading;
+        if (isLoading) {
+          dom.emptyState.classList.add('hidden');
+          dom.sheetsContainer.classList.add('hidden');
+          dom.loadingCard.classList.remove('hidden');
+          dom.loadingTitle.textContent = title;
+          dom.loadingSubtitle.textContent = subtitle;
+          dom.loadingProgressBar.style.width = `${Math.max(5, Math.min(100, percent))}%`;
+        } else {
+          dom.loadingCard.classList.add('hidden');
+          dom.sheetsContainer.classList.remove('hidden');
+        }
+        updateExportButtonStates();
+      }
+
+      function updateLoadingProgress(percent, subtitle) {
+        dom.loadingProgressBar.style.width = `${Math.max(5, Math.min(100, percent))}%`;
+        if (subtitle) dom.loadingSubtitle.textContent = subtitle;
+      }
+
+      // ==================== CLEANUP / RESET ====================
+      function clearLoadedSource() {
+        state.objectUrls.forEach((u) => URL.revokeObjectURL(u));
+        state.objectUrls = [];
+        state.sourceType = null;
+        state.fileName = 'collage';
+        state.pdfBytes = null;
+        state.pages = [];
+        state.previewFilter = 'all';
+        dom.fileInput.value = '';
+        updateUI();
+      }
+
+      // ==================== DEMO PAGE GENERATOR (18 PAGES) ====================
+      async function loadDemoPages() {
+        if (state.isBusy) return;
+        clearLoadedSource();
+        setLoading(true, 'Generating 18 Sample Pages...', 'Creating crisp numbered demo cards for Odd/Even preview', 10);
+
+        try {
+          const totalDemo = 18;
+          const canvasW = 420;
+          const canvasH = 594; // Exact A4 portrait ratio
+          const canvas = document.createElement('canvas');
+          canvas.width = canvasW;
+          canvas.height = canvasH;
+          const ctx = canvas.getContext('2d');
+
+          // Distinct pair accents (9 pairs for 18 pages)
+          const pairPalettes = [
+            { odd: '#4f46e5', even: '#0d9488', bgOdd: '#eef2ff', bgEven: '#f0fdfa' },
+            { odd: '#2563eb', even: '#059669', bgOdd: '#eff6ff', bgEven: '#ecfdf5' },
+            { odd: '#7c3aed', even: '#0891b2', bgOdd: '#f5f3ff', bgEven: '#ecfeff' },
+            { odd: '#4338ca', even: '#0f766e', bgOdd: '#e0e7ff', bgEven: '#ccfbf1' },
+            { odd: '#1d4ed8', even: '#047857', bgOdd: '#dbeafe', bgEven: '#d1fae5' },
+            { odd: '#6d28d9', even: '#0e7490', bgOdd: '#ede9fe', bgEven: '#cffafe' },
+            { odd: '#3730a3', even: '#115e59', bgOdd: '#eef2ff', bgEven: '#f0fdfa' },
+            { odd: '#1e40af', even: '#065f46', bgOdd: '#eff6ff', bgEven: '#ecfdf5' },
+            { odd: '#5b21b6', even: '#155e75', bgOdd: '#f5f3ff', bgEven: '#ecfeff' },
+          ];
+
+          const pages = [];
+
+          for (let i = 1; i <= totalDemo; i++) {
+            const isOdd = i % 2 === 1;
+            const cardNum = Math.ceil(i / 2);
+            const pal = pairPalettes[(cardNum - 1) % pairPalettes.length];
+            const accent = isOdd ? pal.odd : pal.even;
+            const softBg = isOdd ? pal.bgOdd : pal.bgEven;
+
+            // White page base
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvasW, canvasH);
+
+            // Subtle inner tinted card area
+            ctx.fillStyle = softBg;
+            ctx.fillRect(22, 22, canvasW - 44, canvasH - 44);
+
+            // Crisp border frame
+            ctx.strokeStyle = accent;
+            ctx.lineWidth = 6;
+            ctx.strokeRect(22, 22, canvasW - 44, canvasH - 44);
+
+            // Top Header Band
+            ctx.fillStyle = accent;
+            ctx.fillRect(22, 22, canvasW - 44, 86);
+
+            // Top label text
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '700 22px Inter, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(isOdd ? 'ODD • FRONT SIDE' : 'EVEN • BACK SIDE', 42, 74);
+
+            ctx.textAlign = 'right';
+            ctx.font = '800 22px Inter, sans-serif';
+            ctx.fillText(`CARD #${cardNum}`, canvasW - 42, 74);
+
+            // Large Center Circle with Page Number
+            ctx.beginPath();
+            ctx.arc(canvasW / 2, 275, 96, 0, Math.PI * 2);
+            ctx.fillStyle = '#ffffff';
+            ctx.fill();
+            ctx.lineWidth = 6;
+            ctx.strokeStyle = accent;
+            ctx.stroke();
+
+            ctx.fillStyle = accent;
+            ctx.font = '800 84px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(`${i}`, canvasW / 2, 270);
+
+            ctx.fillStyle = '#64748b';
+            ctx.font = '700 18px Inter, sans-serif';
+            ctx.fillText(`PAGE ${i} OF ${totalDemo}`, canvasW / 2, 330);
+
+            // Alignment helper note at bottom
+            ctx.textBaseline = 'alphabetic';
+            ctx.fillStyle = '#1e293b';
+            ctx.font = '700 20px Inter, sans-serif';
+            const pairNote = isOdd
+              ? `Pairs with Page ${i + 1} on Back`
+              : `Aligns behind Page ${i - 1} on Front`;
+            ctx.fillText(pairNote, canvasW / 2, 440);
+
+            // Simulated text lines for realistic print feel
+            ctx.fillStyle = '#cbd5e1';
+            ctx.fillRect(72, 470, canvasW - 144, 10);
+            ctx.fillRect(96, 492, canvasW - 192, 10);
+            ctx.fillRect(120, 514, canvasW - 240, 10);
+
+            // Footer corner marker
+            ctx.fillStyle = accent;
+            ctx.font = '700 14px Inter, sans-serif';
+            ctx.fillText('9-IN-1 ODD/EVEN DEMO SHEET', canvasW / 2, 550);
+
+            // Convert canvas to PNG Blob -> Uint8Array + ObjectURL
+            const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+            const buf = await blob.arrayBuffer();
+            const imageBytes = new Uint8Array(buf);
+            const previewUrl = URL.createObjectURL(blob);
+            state.objectUrls.push(previewUrl);
+
+            pages.push({
+              index: i,
+              width: canvasW,
+              height: canvasH,
+              previewUrl,
+              imageBytes,
+              mimeType: 'image/png',
+              isDemo: true,
+            });
+
+            if (i % 3 === 0) {
+              updateLoadingProgress(10 + Math.round((i / totalDemo) * 85), `Generated Page ${i} of ${totalDemo}`);
+              await yieldFrame();
+            }
+          }
+
+          state.sourceType = 'demo';
+          state.fileName = 'demo-18-pages';
+          state.pages = pages;
+
+          setLoading(false);
+          updateUI();
+          showToast('Loaded 18 demo pages! Inspect Odd (Front) & Even (Mirrored Back) sheets.', 'success');
+        } catch (err) {
+          console.error(err);
+          setLoading(false);
+          showToast('Failed to generate demo pages: ' + err.message, 'error');
+        }
+      }
+
+      // ==================== FILE UPLOAD HANDLING ====================
+      async function handleFiles(fileList) {
+        if (!fileList || fileList.length === 0 || state.isBusy) return;
+        const files = Array.from(fileList);
+
+        // Identify PDFs vs Images
+        const pdfFiles = files.filter((f) => f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf'));
+        const imageFiles = files.filter((f) =>
+          f.type.startsWith('image/') || /\.(jpe?g|png|webp)$/i.test(f.name)
+        );
+
+        if (pdfFiles.length === 0 && imageFiles.length === 0) {
+          showToast('Please upload a PDF file or JPG/PNG/WebP images.', 'error');
+          return;
+        }
+
+        if (pdfFiles.length > 0) {
+          if (pdfFiles.length > 1) {
+            showToast('Multiple PDFs selected — loading the first PDF file.', 'info');
+          }
+          await loadPdfFile(pdfFiles[0]);
+        } else {
+          await loadImageFiles(imageFiles);
+        }
+      }
+
+      async function loadPdfFile(file) {
+        clearLoadedSource();
+        setLoading(true, `Loading "${file.name}"...`, 'Reading PDF structure', 10);
+
+        try {
+          if (!window.pdfjsLib) {
+            throw new Error('PDF.js library failed to load. Check your internet connection.');
+          }
+
+          const arrayBuffer = await file.arrayBuffer();
+          const rawBytes = new Uint8Array(arrayBuffer);
+
+          // IMPORTANT: Keep an untouched copy for pdf-lib, give pdf.js a detached-safe slice
+          const pdfJsCopy = rawBytes.slice();
+          const loadingTask = pdfjsLib.getDocument({ data: pdfJsCopy });
+          const pdfDoc = await loadingTask.promise;
+          const totalPages = pdfDoc.numPages;
+
+          if (totalPages === 0) {
+            throw new Error('This PDF has 0 pages.');
+          }
+
+          const pages = [];
+          const renderCanvas = document.createElement('canvas');
+          const renderCtx = renderCanvas.getContext('2d');
+
+          for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+            const pdfPage = await pdfDoc.getPage(pageNum);
+            const baseViewport = pdfPage.getViewport({ scale: 1 });
+
+            // Render crisp thumbnail (~280px max width for fast, sharp previews)
+            const targetWidth = totalPages > 60 ? 200 : 280;
+            const scale = Math.min(1.5, targetWidth / Math.max(baseViewport.width, 1));
+            const thumbViewport = pdfPage.getViewport({ scale });
+
+            renderCanvas.width = Math.max(1, Math.floor(thumbViewport.width));
+            renderCanvas.height = Math.max(1, Math.floor(thumbViewport.height));
+
+            // White paper background before rendering PDF page
+            renderCtx.fillStyle = '#ffffff';
+            renderCtx.fillRect(0, 0, renderCanvas.width, renderCanvas.height);
+
+            await pdfPage.render({
+              canvasContext: renderCtx,
+              viewport: thumbViewport,
+            }).promise;
+
+            const blob = await new Promise((resolve) => renderCanvas.toBlob(resolve, 'image/jpeg', 0.85));
+            const previewUrl = URL.createObjectURL(blob);
+            state.objectUrls.push(previewUrl);
+
+            pages.push({
+              index: pageNum,
+              width: baseViewport.width,
+              height: baseViewport.height,
+              previewUrl,
+            });
+
+            if (pageNum % 2 === 0 || pageNum === totalPages) {
+              updateLoadingProgress(
+                15 + Math.round((pageNum / totalPages) * 85),
+                `Rendered preview ${pageNum} of ${totalPages} pages`
+              );
+              await yieldFrame();
+            }
+          }
+
+          state.sourceType = 'pdf';
+          state.fileName = file.name.replace(/\.pdf$/i, '') || 'document';
+          state.pdfBytes = rawBytes;
+          state.pages = pages;
+
+          setLoading(false);
+          updateUI();
+          showToast(`Loaded "${file.name}" (${totalPages} pages) — Vector export ready!`, 'success');
+        } catch (err) {
+          console.error(err);
+          setLoading(false);
+          clearLoadedSource();
+          showToast('Could not read PDF: ' + (err.message || 'Invalid or encrypted PDF'), 'error', 5000);
+        }
+      }
+
+      async function loadImageFiles(files) {
+        clearLoadedSource();
+
+        // Natural numeric sort so page2.jpg comes before page10.jpg
+        const sorted = [...files].sort((a, b) =>
+          a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' })
+        );
+
+        setLoading(true, `Loading ${sorted.length} Image${sorted.length > 1 ? 's' : ''}...`, 'Preparing crisp thumbnails', 10);
+
+        try {
+          const pages = [];
+          for (let i = 0; i < sorted.length; i++) {
+            const file = sorted[i];
+            const prepared = await prepareImageForEmbedding(file);
+            state.objectUrls.push(prepared.previewUrl);
+
+            pages.push({
+              index: i + 1,
+              width: prepared.width,
+              height: prepared.height,
+              previewUrl: prepared.previewUrl,
+              imageBytes: prepared.imageBytes,
+              mimeType: prepared.mimeType,
+            });
+
+            updateLoadingProgress(
+              10 + Math.round(((i + 1) / sorted.length) * 90),
+              `Loaded image ${i + 1} of ${sorted.length}`
+            );
+            if (i % 3 === 0) await yieldFrame();
+          }
+
+          state.sourceType = 'images';
+          state.fileName = sorted.length === 1
+            ? sorted[0].name.replace(/\.[^.]+$/, '')
+            : `${sorted.length}-images-collage`;
+          state.pages = pages;
+
+          setLoading(false);
+          updateUI();
+          showToast(`Loaded ${pages.length} image${pages.length > 1 ? 's' : ''} successfully!`, 'success');
+        } catch (err) {
+          console.error(err);
+          setLoading(false);
+          clearLoadedSource();
+          showToast('Failed to load images: ' + err.message, 'error', 5000);
+        }
+      }
+
+      // Loads an image file, reads dimensions, and ensures PNG/JPG bytes compatible with pdf-lib
+      async function prepareImageForEmbedding(file) {
+        const objectUrl = URL.createObjectURL(file);
+        const img = await new Promise((resolve, reject) => {
+          const el = new Image();
+          el.onload = () => resolve(el);
+          el.onerror = () => reject(new Error(`Unable to decode image "${file.name}"`));
+          el.src = objectUrl;
+        });
+
+        const width = img.naturalWidth || img.width;
+        const height = img.naturalHeight || img.height;
+        const isNativeJpg = file.type === 'image/jpeg' || /\.jpe?g$/i.test(file.name);
+        const isNativePng = file.type === 'image/png' || /\.png$/i.test(file.name);
+
+        if (isNativeJpg || isNativePng) {
+          const buf = await file.arrayBuffer();
+          return {
+            width,
+            height,
+            previewUrl: objectUrl,
+            imageBytes: new Uint8Array(buf),
+            mimeType: isNativePng ? 'image/png' : 'image/jpeg',
+          };
+        }
+
+        // Convert WebP or other browser-supported formats to PNG for pdf-lib compatibility
+        const c = document.createElement('canvas');
+        c.width = width;
+        c.height = height;
+        const ctx = c.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        const pngBlob = await new Promise((resolve) => c.toBlob(resolve, 'image/png'));
+        const pngBuf = await pngBlob.arrayBuffer();
+        return {
+          width,
+          height,
+          previewUrl: objectUrl,
+          imageBytes: new Uint8Array(pngBuf),
+          mimeType: 'image/png',
+        };
+      }
+
+      function yieldFrame() {
+        return new Promise((resolve) => setTimeout(resolve, 0));
+      }
+
+      // ==================== CORE ODD-EVEN LAYOUT ENGINE ====================
+      /**
+       * Mirrors a fixed rows x cols cell array horizontally (long-edge flip)
+       * or vertically (short-edge flip). Null cells are preserved so partial
+       * last sheets align directly behind the corresponding front cells!
+       */
+      function applyMirroring(cells, cols, rows, mirrorMode) {
+        if (mirrorMode === 'none') return [...cells];
+
+        const result = new Array(rows * cols).fill(null);
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const srcIdx = r * cols + c;
+            let dstIdx = srcIdx;
+            if (mirrorMode === 'horizontal') {
+              // Flip each row left-to-right: [2, 4, 6] -> [6, 4, 2]
+              dstIdx = r * cols + (cols - 1 - c);
+            } else if (mirrorMode === 'vertical') {
+              // Flip columns top-to-bottom: row 0 <-> last row
+              dstIdx = (rows - 1 - r) * cols + c;
+            }
+            result[dstIdx] = cells[srcIdx];
+          }
+        }
+        return result;
+      }
+
+      /**
+       * Computes the ordered list of output sheets based on current state.
+       * Each sheet object:
+       * {
+       *   sheetNumber: 1..M,
+       *   type: 'odd' | 'even' | 'sequential',
+       *   title: string,
+       *   badge: string,
+       *   mirrored: 'horizontal' | 'vertical' | 'none',
+       *   cells: Array<PageObj | null> // exact length rows * cols
+       * }
+       */
+      function computeSheets() {
+        const total = state.pages.length;
+        if (total === 0) return [];
+
+        const { cols, rows, perSheet } = GRIDS[state.grid];
+        const mode = state.mode;
+        const mirror = state.mirrorMode;
+        const sheets = [];
+
+        if (mode === 'duplex-alternating' || mode === 'manual-duplex') {
+          const batchSize = perSheet * 2; // e.g., 18 pages for 3x3
+          const numBatches = Math.ceil(total / batchSize);
+          const oddSheets = [];
+          const evenSheets = [];
+
+          for (let b = 0; b < numBatches; b++) {
+            const start = b * batchSize; // 0-based
+            const oddCells = new Array(perSheet).fill(null);
+            const evenCells = new Array(perSheet).fill(null);
+            let hasEven = false;
+
+            for (let slot = 0; slot < perSheet; slot++) {
+              const oddIdx = start + slot * 2;       // 0, 2, 4... => Page 1, 3, 5...
+              const evenIdx = start + slot * 2 + 1;  // 1, 3, 5... => Page 2, 4, 6...
+              if (oddIdx < total) oddCells[slot] = state.pages[oddIdx];
+              if (evenIdx < total) {
+                evenCells[slot] = state.pages[evenIdx];
+                hasEven = true;
+              }
+            }
+
+            oddSheets.push({
+              type: 'odd',
+              pairIndex: b + 1,
+              mirrored: 'none',
+              cells: oddCells,
+              isBlankBack: false,
+            });
+
+            // Include matching Even sheet if there's at least 1 even page in this batch,
+            // OR if manual-duplex + reverseEvenOrder needs a blank alignment sheet for stack parity.
+            if (hasEven || (mode === 'manual-duplex' && state.reverseEvenOrder)) {
+              const mirroredEvenCells = applyMirroring(evenCells, cols, rows, mirror);
+              evenSheets.push({
+                type: 'even',
+                pairIndex: b + 1,
+                mirrored: mirror,
+                cells: mirroredEvenCells,
+                isBlankBack: !hasEven,
+              });
+            }
+          }
+
+          if (mode === 'duplex-alternating') {
+            for (let i = 0; i < oddSheets.length; i++) {
+              sheets.push(oddSheets[i]);
+              if (evenSheets[i]) sheets.push(evenSheets[i]);
+            }
+          } else {
+            // Manual duplex: all Odd sheets first, then all Even sheets (optionally reversed)
+            sheets.push(...oddSheets);
+            const orderedEven = state.reverseEvenOrder ? [...evenSheets].reverse() : evenSheets;
+            sheets.push(...orderedEven);
+          }
+        } else if (mode === 'odd-only') {
+          const oddPages = state.pages.filter((p) => p.index % 2 === 1);
+          const count = Math.ceil(oddPages.length / perSheet);
+          for (let s = 0; s < count; s++) {
+            const cells = new Array(perSheet).fill(null);
+            for (let i = 0; i < perSheet; i++) {
+              cells[i] = oddPages[s * perSheet + i] || null;
+            }
+            sheets.push({
+              type: 'odd',
+              pairIndex: s + 1,
+              mirrored: 'none',
+              cells,
+              isBlankBack: false,
+            });
+          }
+        } else if (mode === 'even-only') {
+          const evenPages = state.pages.filter((p) => p.index % 2 === 0);
+          const count = Math.ceil(evenPages.length / perSheet);
+          for (let s = 0; s < count; s++) {
+            const rawCells = new Array(perSheet).fill(null);
+            for (let i = 0; i < perSheet; i++) {
+              rawCells[i] = evenPages[s * perSheet + i] || null;
+            }
+            const cells = applyMirroring(rawCells, cols, rows, mirror);
+            sheets.push({
+              type: 'even',
+              pairIndex: s + 1,
+              mirrored: mirror,
+              cells,
+              isBlankBack: false,
+            });
+          }
+        } else {
+          // Standard Sequential
+          const count = Math.ceil(total / perSheet);
+          for (let s = 0; s < count; s++) {
+            const cells = new Array(perSheet).fill(null);
+            for (let i = 0; i < perSheet; i++) {
+              cells[i] = state.pages[s * perSheet + i] || null;
+            }
+            sheets.push({
+              type: 'sequential',
+              pairIndex: s + 1,
+              mirrored: 'none',
+              cells,
+              isBlankBack: false,
+            });
+          }
+        }
+
+        // Assign final sheet numbers and human-readable labels
+        return sheets.map((sh, idx) => {
+          const num = idx + 1;
+          let sideLabel = 'SEQUENTIAL';
+          if (sh.type === 'odd') {
+            sideLabel = mode === 'odd-only' ? 'ODD' : `ODD (Front #${sh.pairIndex})`;
+          } else if (sh.type === 'even') {
+            const mirrorTag =
+              sh.mirrored === 'horizontal'
+                ? ' • Mirrored H'
+                : sh.mirrored === 'vertical'
+                ? ' • Mirrored V'
+                : '';
+            if (sh.isBlankBack) {
+              sideLabel = `EVEN (Blank Back #${sh.pairIndex})`;
+            } else {
+              sideLabel = mode === 'even-only'
+                ? `EVEN${mirrorTag}`
+                : `EVEN (Back #${sh.pairIndex}${mirrorTag})`;
+            }
+          }
+
+          return {
+            ...sh,
+            sheetNumber: num,
+            label: `Sheet ${num} • ${sideLabel}`,
+          };
+        });
+      }
+
+      // ==================== GEOMETRY HELPER ====================
+      function getPageDimensionsMm() {
+        const base = PAPER_SIZES_MM[state.paperSize];
+        return state.orientation === 'landscape'
+          ? { widthMm: base.height, heightMm: base.width }
+          : { widthMm: base.width, heightMm: base.height };
+      }
+
+      // ==================== RENDER LIVE PREVIEW & UI SYNC ====================
+      function updateUI() {
+        const { cols, rows, perSheet } = GRIDS[state.grid];
+
+        // 1. Grid buttons active styling
+        dom.gridBtns.forEach((btn) => {
+          const active = btn.dataset.grid === state.grid;
+          btn.className = `grid-btn py-2 px-2 rounded-xl border text-xs font-semibold transition cursor-pointer ${
+            active
+              ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
+              : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+          }`;
+        });
+
+        // 2. Fit buttons active styling
+        dom.fitBtns.forEach((btn) => {
+          const active = btn.dataset.fit === state.fitMode;
+          btn.className = `fit-btn py-2 px-2.5 rounded-xl border text-xs font-semibold transition cursor-pointer ${
+            active
+              ? 'bg-indigo-50 text-indigo-700 border-indigo-400'
+              : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+          }`;
+        });
+
+        // 3. Mode explanation & conditional controls
+        dom.modeSelect.value = state.mode;
+        dom.modeDescription.textContent = MODE_DESCRIPTIONS[state.mode](perSheet);
+
+        const supportsMirror =
+          state.mode === 'duplex-alternating' ||
+          state.mode === 'manual-duplex' ||
+          state.mode === 'even-only';
+        dom.mirrorControlGroup.classList.toggle('opacity-45', !supportsMirror);
+        dom.mirrorControlGroup.classList.toggle('pointer-events-none', !supportsMirror);
+
+        dom.reverseEvenWrapper.classList.toggle('hidden', state.mode !== 'manual-duplex');
+        dom.reverseEvenCheckbox.checked = state.reverseEvenOrder;
+
+        // 4. Mirror radios
+        dom.mirrorRadios.forEach((r) => {
+          r.checked = r.value === state.mirrorMode;
+        });
+
+        // 5. Sliders readouts
+        dom.marginValue.textContent = `${state.marginMm} mm`;
+        dom.gapValue.textContent = `${state.gapMm} mm`;
+
+        // 6. Source status
+        const hasPages = state.pages.length > 0;
+        dom.clearFilesBtn.classList.toggle('hidden', !hasPages);
+        dom.sourceStatusBox.classList.toggle('hidden', !hasPages);
+
+        if (hasPages) {
+          dom.sourceFileName.textContent = state.fileName;
+          const typeLabel =
+            state.sourceType === 'pdf'
+              ? 'PDF Vector Source'
+              : state.sourceType === 'demo'
+              ? 'Generated Demo Cards'
+              : 'Image Collection';
+          dom.sourceMeta.textContent = `${state.pages.length} page${state.pages.length > 1 ? 's' : ''} • ${typeLabel}`;
+          dom.sourceBadge.textContent = `${state.pages.length} pgs`;
+        }
+
+        // 7. Preview filter tabs styling
+        dom.filterTabs.forEach((tab) => {
+          const active = tab.dataset.filter === state.previewFilter;
+          tab.className = `filter-tab px-3 py-1 rounded-lg transition cursor-pointer ${
+            active
+              ? 'bg-white text-slate-900 shadow-sm'
+              : 'text-slate-500 hover:text-slate-800'
+          }`;
+        });
+
+        // 8. Compute & Render Sheets
+        const sheets = computeSheets();
+        updateExportButtonStates(sheets);
+
+        if (!hasPages) {
+          dom.emptyState.classList.remove('hidden');
+          dom.previewToolbar.classList.add('hidden');
+          dom.sheetsContainer.innerHTML = '';
+          return;
+        }
+
+        dom.emptyState.classList.add('hidden');
+        dom.previewToolbar.classList.remove('hidden');
+
+        // Summary badges
+        const oddCount = sheets.filter((s) => s.type === 'odd').length;
+        const evenCount = sheets.filter((s) => s.type === 'even').length;
+        dom.statSummary.textContent = `${state.pages.length} input pages → ${sheets.length} ${PAPER_SIZES_MM[state.paperSize].label} sheet${sheets.length !== 1 ? 's' : ''}`;
+
+        dom.statOddBadge.classList.toggle('hidden', oddCount === 0);
+        dom.statOddBadge.textContent = `${oddCount} Odd`;
+        dom.statEvenBadge.classList.toggle('hidden', evenCount === 0);
+        dom.statEvenBadge.textContent = `${evenCount} Even`;
+
+        // Filter sheets for preview
+        const visibleSheets = sheets.filter((s) => {
+          if (state.previewFilter === 'odd') return s.type === 'odd';
+          if (state.previewFilter === 'even') return s.type === 'even';
+          return true;
+        });
+
+        renderSheetCards(visibleSheets, cols, rows);
+      }
+
+      function updateExportButtonStates(sheetsArg) {
+        const sheets = sheetsArg || computeSheets();
+        const hasAny = sheets.length > 0 && !state.isBusy;
+        const hasOdd = sheets.some((s) => s.type === 'odd') && !state.isBusy;
+        const hasEven = sheets.some((s) => s.type === 'even') && !state.isBusy;
+
+        dom.headerDownloadBtn.disabled = !hasAny;
+        dom.exportFullBtn.disabled = !hasAny;
+        dom.exportOddBtn.disabled = !hasOdd;
+        dom.exportEvenBtn.disabled = !hasEven;
+      }
+
+      function renderSheetCards(sheets, cols, rows) {
+        const { widthMm, heightMm } = getPageDimensionsMm();
+
+        // Convert mm margins & gaps to exact percentage of sheet dimensions for true WYSIWYG preview
+        const padXPercent = (state.marginMm / widthMm) * 100;
+        const padYPercent = (state.marginMm / heightMm) * 100;
+        const gapXPercent = (state.gapMm / widthMm) * 100;
+        const gapYPercent = (state.gapMm / heightMm) * 100;
+
+        if (sheets.length === 0) {
+          dom.sheetsContainer.innerHTML = `
+            <div class="col-span-full bg-white rounded-2xl border border-slate-200 p-10 text-center text-sm text-slate-500">
+              No sheets match the selected filter ("${escapeHtml(state.previewFilter)}"). Switch to <strong>All</strong> to view all output sheets.
+            </div>
+          `;
+          return;
+        }
+
+        const fragment = document.createDocumentFragment();
+
+        sheets.forEach((sheet) => {
+          const card = document.createElement('article');
+          card.className = 'bg-white rounded-2xl border border-slate-200/90 p-3.5 sm:p-4 shadow-sm flex flex-col gap-3';
+
+          // Badge colors by sheet type
+          let pillClass = 'bg-slate-100 text-slate-700 border-slate-200';
+          let dotClass = 'bg-slate-500';
+          if (sheet.type === 'odd') {
+            pillClass = 'bg-indigo-50 text-indigo-700 border-indigo-200/90';
+            dotClass = 'bg-indigo-600';
+          } else if (sheet.type === 'even') {
+            pillClass = 'bg-teal-50 text-teal-700 border-teal-200/90';
+            dotClass = 'bg-teal-600';
+          }
+
+          // Quick sequence string of page numbers on this sheet (first row preview)
+          const pageNumsSummary = sheet.cells
+            .map((c) => (c ? `P${c.index}` : '—'))
+            .join(', ');
+
+          // Header of Sheet Card
+          const header = document.createElement('div');
+          header.className = 'flex flex-wrap items-center justify-between gap-2';
+          header.innerHTML = `
+            <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg border text-xs font-bold ${pillClass}">
+              <span class="w-2 h-2 rounded-full ${dotClass}"></span>
+              <span>${escapeHtml(sheet.label)}</span>
+            </div>
+            <span class="text-[11px] font-medium text-slate-400 truncate max-w-[200px]" title="${escapeHtml(pageNumsSummary)}">
+              ${cols}×${rows} • ${PAPER_SIZES_MM[state.paperSize].label} ${state.orientation === 'landscape' ? 'Land.' : 'Port.'}
+            </span>
+          `;
+          card.appendChild(header);
+
+          // Paper Sheet Visual Canvas (Exact Aspect Ratio)
+          const paperFrame = document.createElement('div');
+          paperFrame.className = 'w-full bg-slate-100/80 rounded-xl p-2 sm:p-3 flex items-center justify-center border border-slate-200/70';
+
+          const paper = document.createElement('div');
+          paper.className = 'w-full bg-white sheet-shadow relative overflow-hidden border border-slate-300/70';
+          paper.style.aspectRatio = `${widthMm} / ${heightMm}`;
+          paper.style.padding = `${padYPercent}% ${padXPercent}%`;
+
+          const gridEl = document.createElement('div');
+          gridEl.className = 'w-full h-full grid';
+          gridEl.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
+          gridEl.style.gridTemplateRows = `repeat(${rows}, minmax(0, 1fr))`;
+          gridEl.style.columnGap = `${gapXPercent}%`;
+          gridEl.style.rowGap = `${gapYPercent}%`;
+
+          sheet.cells.forEach((pageObj) => {
+            const cell = document.createElement('div');
+            cell.className = `relative w-full h-full overflow-hidden flex items-center justify-center bg-white ${
+              state.showCutLines ? 'border border-dashed border-slate-400/80' : ''
+            }`;
+
+            if (pageObj) {
+              const img = document.createElement('img');
+              img.src = pageObj.previewUrl;
+              img.alt = `Page ${pageObj.index}`;
+              img.loading = 'lazy';
+              img.className =
+                state.fitMode === 'cover'
+                  ? 'w-full h-full object-cover select-none'
+                  : 'w-full h-full object-contain select-none';
+              cell.appendChild(img);
+
+              // Subtle Page Number Corner Badge (Preview Only)
+              if (state.showPreviewBadges) {
+                const isOddPage = pageObj.index % 2 === 1;
+                const badge = document.createElement('span');
+                badge.className = `absolute top-1 left-1 px-1.5 py-0.5 rounded-md text-[10px] font-extrabold leading-none shadow-sm backdrop-blur-sm ${
+                  isOddPage
+                    ? 'bg-indigo-600/90 text-white'
+                    : 'bg-teal-600/90 text-white'
+                }`;
+                badge.textContent = `P${pageObj.index}`;
+                cell.appendChild(badge);
+              }
+            } else {
+              // Empty Cell Placeholder
+              cell.classList.add('bg-slate-50/70');
+              const blankTag = document.createElement('span');
+              blankTag.className = 'text-[10px] font-medium text-slate-300 select-none';
+              blankTag.textContent = 'Blank';
+              cell.appendChild(blankTag);
+            }
+
+            gridEl.appendChild(cell);
+          });
+
+          paper.appendChild(gridEl);
+          paperFrame.appendChild(paper);
+          card.appendChild(paperFrame);
+
+          // Mini Footer Row Order Legend (great for double-checking mirroring!)
+          const footer = document.createElement('div');
+          footer.className = 'flex items-center justify-between text-[11px] text-slate-500 pt-0.5';
+          const row1Text = sheet.cells
+            .slice(0, cols)
+            .map((c) => (c ? `P${c.index}` : '—'))
+            .join(' | ');
+          footer.innerHTML = `
+            <span class="truncate">Top row: <strong class="text-slate-700 font-semibold">[ ${escapeHtml(row1Text)} ]</strong></span>
+            ${
+              sheet.mirrored !== 'none'
+                ? `<span class="shrink-0 text-teal-700 font-semibold">${sheet.mirrored === 'horizontal' ? '⇄ Mirrored' : '⇅ Mirrored'}</span>`
+                : ''
+            }
+          `;
+          card.appendChild(footer);
+
+          fragment.appendChild(card);
+        });
+
+        dom.sheetsContainer.innerHTML = '';
+        dom.sheetsContainer.appendChild(fragment);
+      }
+
+      // ==================== HIGH-QUALITY PDF EXPORT (PDF-LIB) ====================
+      /**
+       * Draws an embedded PDF page inside target rectangle (tx, ty, vw, vh)
+       * while accurately honoring any native PDF /Rotate metadata (0, 90, 180, 270).
+       */
+      function drawEmbeddedPdfPage(outPage, embeddedPage, rotationAngle, tx, ty, scale) {
+        const angle = ((rotationAngle % 360) + 360) % 360;
+        const w = embeddedPage.width * scale;
+        const h = embeddedPage.height * scale;
+
+        if (angle === 90) {
+          outPage.drawPage(embeddedPage, {
+            x: tx,
+            y: ty + w,
+            xScale: scale,
+            yScale: scale,
+            rotate: PDFLib.degrees(-90),
+          });
+        } else if (angle === 180) {
+          outPage.drawPage(embeddedPage, {
+            x: tx + w,
+            y: ty + h,
+            xScale: scale,
+            yScale: scale,
+            rotate: PDFLib.degrees(180),
+          });
+        } else if (angle === 270) {
+          outPage.drawPage(embeddedPage, {
+            x: tx + h,
+            y: ty,
+            xScale: scale,
+            yScale: scale,
+            rotate: PDFLib.degrees(90),
+          });
+        } else {
+          outPage.drawPage(embeddedPage, {
+            x: tx,
+            y: ty,
+            xScale: scale,
+            yScale: scale,
+          });
+        }
+      }
+
+      async function exportPdf(subset = 'all') {
+        if (state.isBusy || state.pages.length === 0) return;
+
+        if (!window.PDFLib) {
+          showToast('pdf-lib library failed to load. Please check your internet connection.', 'error');
+          return;
+        }
+
+        const allSheets = computeSheets();
+        const targetSheets =
+          subset === 'odd'
+            ? allSheets.filter((s) => s.type === 'odd')
+            : subset === 'even'
+            ? allSheets.filter((s) => s.type === 'even')
+            : allSheets;
+
+        if (targetSheets.length === 0) {
+          showToast(`No ${subset} sheets available in the current layout.`, 'error');
+          return;
+        }
+
+        state.isBusy = true;
+        updateExportButtonStates(allSheets);
+
+        const labelSuffix = subset === 'all' ? 'Full' : subset === 'odd' ? 'Odd Sheets' : 'Even Sheets';
+        const progressToast = showToast(`Generating ${labelSuffix} PDF (${targetSheets.length} sheets)...`, 'loading', 0);
+
+        try {
+          const outDoc = await PDFLib.PDFDocument.create();
+          outDoc.setTitle(`${state.fileName} - 9-in-1 ${labelSuffix}`);
+          outDoc.setCreator('9-in-1 Odd/Even Page Setup & Collage Maker');
+
+          const { cols, rows } = GRIDS[state.grid];
+          const { widthMm, heightMm } = getPageDimensionsMm();
+
+          const pageW = widthMm * MM_TO_PT;
+          const pageH = heightMm * MM_TO_PT;
+          const marginPt = state.marginMm * MM_TO_PT;
+          const gapPt = state.gapMm * MM_TO_PT;
+
+          const usableW = Math.max(10, pageW - 2 * marginPt - (cols - 1) * gapPt);
+          const usableH = Math.max(10, pageH - 2 * marginPt - (rows - 1) * gapPt);
+          const cellW = usableW / cols;
+          const cellH = usableH / rows;
+
+          // Load source PDF once for true 100% vector embedding
+          let srcPdfDoc = null;
+          const embeddedPdfCache = new Map();
+          const embeddedImgCache = new Map();
+
+          if (state.sourceType === 'pdf' && state.pdfBytes) {
+            srcPdfDoc = await PDFLib.PDFDocument.load(state.pdfBytes, { ignoreEncryption: true });
+          }
+
+          for (let sIdx = 0; sIdx < targetSheets.length; sIdx++) {
+            const sheet = targetSheets[sIdx];
+            const outPage = outDoc.addPage([pageW, pageH]);
+
+            // Subtle crisp white sheet background
+            outPage.drawRectangle({
+              x: 0,
+              y: 0,
+              width: pageW,
+              height: pageH,
+              color: PDFLib.rgb(1, 1, 1),
+            });
+
+            for (let cellIdx = 0; cellIdx < sheet.cells.length; cellIdx++) {
+              const pageObj = sheet.cells[cellIdx];
+              const r = Math.floor(cellIdx / cols);
+              const c = cellIdx % cols;
+
+              // PDF coordinates start at bottom-left
+              const cellX = marginPt + c * (cellW + gapPt);
+              const cellY = pageH - marginPt - (r + 1) * cellH - r * gapPt;
+
+              if (pageObj) {
+                if (state.sourceType === 'pdf' && srcPdfDoc) {
+                  const zeroIdx = pageObj.index - 1;
+                  let cached = embeddedPdfCache.get(zeroIdx);
+                  if (!cached) {
+                    const srcPage = srcPdfDoc.getPage(zeroIdx);
+                    const rotationAngle = srcPage.getRotation().angle || 0;
+                    const embedded = await outDoc.embedPage(srcPage);
+                    const normAngle = ((rotationAngle % 360) + 360) % 360;
+                    const visualW = normAngle === 90 || normAngle === 270 ? embedded.height : embedded.width;
+                    const visualH = normAngle === 90 || normAngle === 270 ? embedded.width : embedded.height;
+                    cached = { embedded, rotationAngle: normAngle, visualW, visualH };
+                    embeddedPdfCache.set(zeroIdx, cached);
+                  }
+
+                  const scale =
+                    state.fitMode === 'cover'
+                      ? Math.max(cellW / cached.visualW, cellH / cached.visualH)
+                      : Math.min(cellW / cached.visualW, cellH / cached.visualH);
+
+                  const drawW = cached.visualW * scale;
+                  const drawH = cached.visualH * scale;
+                  const drawX = cellX + (cellW - drawW) / 2;
+                  const drawY = cellY + (cellH - drawH) / 2;
+
+                  // Clip to cell bounds so Fill/Cover mode or page bleed never overlaps neighbors
+                  outPage.pushOperators(
+                    PDFLib.pushGraphicsState(),
+                    PDFLib.rectangle(cellX, cellY, cellW, cellH),
+                    PDFLib.clip(),
+                    PDFLib.endPath()
+                  );
+                  drawEmbeddedPdfPage(outPage, cached.embedded, cached.rotationAngle, drawX, drawY, scale);
+                  outPage.pushOperators(PDFLib.popGraphicsState());
+                } else if (pageObj.imageBytes) {
+                  let imgEmbed = embeddedImgCache.get(pageObj.index);
+                  if (!imgEmbed) {
+                    imgEmbed =
+                      pageObj.mimeType === 'image/jpeg'
+                        ? await outDoc.embedJpg(pageObj.imageBytes)
+                        : await outDoc.embedPng(pageObj.imageBytes);
+                    embeddedImgCache.set(pageObj.index, imgEmbed);
+                  }
+
+                  const imgW = imgEmbed.width;
+                  const imgH = imgEmbed.height;
+                  const scale =
+                    state.fitMode === 'cover'
+                      ? Math.max(cellW / imgW, cellH / imgH)
+                      : Math.min(cellW / imgW, cellH / imgH);
+
+                  const drawW = imgW * scale;
+                  const drawH = imgH * scale;
+                  const drawX = cellX + (cellW - drawW) / 2;
+                  const drawY = cellY + (cellH - drawH) / 2;
+
+                  outPage.pushOperators(
+                    PDFLib.pushGraphicsState(),
+                    PDFLib.rectangle(cellX, cellY, cellW, cellH),
+                    PDFLib.clip(),
+                    PDFLib.endPath()
+                  );
+                  outPage.drawImage(imgEmbed, {
+                    x: drawX,
+                    y: drawY,
+                    width: drawW,
+                    height: drawH,
+                  });
+                  outPage.pushOperators(PDFLib.popGraphicsState());
+                }
+              }
+
+              // Draw subtle dashed cut lines around each cell if enabled
+              if (state.showCutLines) {
+                outPage.drawRectangle({
+                  x: cellX,
+                  y: cellY,
+                  width: cellW,
+                  height: cellH,
+                  borderColor: PDFLib.rgb(0.62, 0.66, 0.72),
+                  borderWidth: 0.6,
+                  borderDashArray: [3, 3],
+                });
+              }
+            }
+
+            // Keep UI responsive for large PDFs
+            if (sIdx % 3 === 0) {
+              progressToast.querySelector('span:last-child').textContent =
+                `Building sheet ${sIdx + 1} of ${targetSheets.length}...`;
+              await yieldFrame();
+            }
+          }
+
+          const pdfBytesOut = await outDoc.save();
+          const blob = new Blob([pdfBytesOut], { type: 'application/pdf' });
+          const url = URL.createObjectURL(blob);
+
+          const suffixSlug =
+            subset === 'all'
+              ? `${state.grid}-${state.mode}`
+              : `${state.grid}-${subset}-only`;
+          const outFileName = `${state.fileName}_${suffixSlug}.pdf`;
+
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = outFileName;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+
+          // Revoke download URL after short delay
+          setTimeout(() => URL.revokeObjectURL(url), 5000);
+
+          progressToast.remove();
+          showToast(`Downloaded "${outFileName}" (${targetSheets.length} sheets)!`, 'success', 4500);
+        } catch (err) {
+          console.error(err);
+          progressToast.remove();
+          showToast('PDF Export failed: ' + (err.message || 'Unknown error'), 'error', 5500);
+        } finally {
+          state.isBusy = false;
+          updateExportButtonStates();
+        }
+      }
+
+      // ==================== EVENT LISTENERS ====================
+      function bindEvents() {
+        // File picker & Dropzone
+        const triggerFilePick = () => {
+          if (!state.isBusy) dom.fileInput.click();
+        };
+
+        dom.dropZone.addEventListener('click', triggerFilePick);
+        dom.dropZone.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            triggerFilePick();
+          }
+        });
+        dom.emptyUploadBtn.addEventListener('click', triggerFilePick);
+
+        dom.fileInput.addEventListener('change', (e) => {
+          if (e.target.files && e.target.files.length > 0) {
+            handleFiles(e.target.files);
+          }
+        });
+
+        // Drag-and-drop highlight & drop
+        ['dragenter', 'dragover'].forEach((evt) => {
+          dom.dropZone.addEventListener(evt, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dom.dropZone.classList.add('border-indigo-500', 'bg-indigo-50/70');
+          });
+        });
+
+        ['dragleave', 'drop'].forEach((evt) => {
+          dom.dropZone.addEventListener(evt, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dom.dropZone.classList.remove('border-indigo-500', 'bg-indigo-50/70');
+          });
+        });
+
+        dom.dropZone.addEventListener('drop', (e) => {
+          if (e.dataTransfer && e.dataTransfer.files) {
+            handleFiles(e.dataTransfer.files);
+          }
+        });
+
+        // Clear Files
+        dom.clearFilesBtn.addEventListener('click', () => {
+          clearLoadedSource();
+          showToast('Cleared loaded pages.', 'info', 2200);
+        });
+
+        // Demo Load Buttons
+        dom.headerDemoBtn.addEventListener('click', loadDemoPages);
+        dom.sidebarDemoBtn.addEventListener('click', loadDemoPages);
+        dom.emptyDemoBtn.addEventListener('click', loadDemoPages);
+
+        // Grid Selector
+        dom.gridBtns.forEach((btn) => {
+          btn.addEventListener('click', () => {
+            state.grid = btn.dataset.grid;
+            updateUI();
+          });
+        });
+
+        // Mode Selector
+        dom.modeSelect.addEventListener('change', (e) => {
+          state.mode = e.target.value;
+          // Reset filter to 'all' if current filter has no sheets in new mode
+          if (state.mode === 'odd-only' || state.mode === 'even-only' || state.mode === 'sequential') {
+            state.previewFilter = 'all';
+          }
+          updateUI();
+        });
+
+        // Mirror Radios
+        dom.mirrorRadios.forEach((radio) => {
+          radio.addEventListener('change', (e) => {
+            if (e.target.checked) {
+              state.mirrorMode = e.target.value;
+              updateUI();
+            }
+          });
+        });
+
+        // Reverse Even Order (Manual Duplex)
+        dom.reverseEvenCheckbox.addEventListener('change', (e) => {
+          state.reverseEvenOrder = e.target.checked;
+          updateUI();
+        });
+
+        // Page Setup Controls
+        dom.paperSizeSelect.addEventListener('change', (e) => {
+          state.paperSize = e.target.value;
+          updateUI();
+        });
+
+        dom.orientationSelect.addEventListener('change', (e) => {
+          state.orientation = e.target.value;
+          updateUI();
+        });
+
+        dom.marginSlider.addEventListener('input', (e) => {
+          state.marginMm = parseFloat(e.target.value);
+          updateUI();
+        });
+
+        dom.gapSlider.addEventListener('input', (e) => {
+          state.gapMm = parseFloat(e.target.value);
+          updateUI();
+        });
+
+        dom.fitBtns.forEach((btn) => {
+          btn.addEventListener('click', () => {
+            state.fitMode = btn.dataset.fit;
+            updateUI();
+          });
+        });
+
+        dom.cutLinesCheckbox.addEventListener('change', (e) => {
+          state.showCutLines = e.target.checked;
+          updateUI();
+        });
+
+        dom.previewBadgeCheckbox.addEventListener('change', (e) => {
+          state.showPreviewBadges = e.target.checked;
+          updateUI();
+        });
+
+        // Preview Filter Tabs
+        dom.filterTabs.forEach((tab) => {
+          tab.addEventListener('click', () => {
+            state.previewFilter = tab.dataset.filter;
+            updateUI();
+          });
+        });
+
+        // Collapsible Duplex Diagram
+        dom.toggleGuideBtn.addEventListener('click', () => {
+          const isHidden = dom.guideContent.classList.toggle('hidden');
+          dom.guideChevron.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+        });
+
+        // Export Buttons
+        dom.headerDownloadBtn.addEventListener('click', () => exportPdf('all'));
+        dom.exportFullBtn.addEventListener('click', () => exportPdf('all'));
+        dom.exportOddBtn.addEventListener('click', () => exportPdf('odd'));
+        dom.exportEvenBtn.addEventListener('click', () => exportPdf('even'));
+      }
+
+      // ==================== INITIALIZATION ====================
+      bindEvents();
+      updateUI();
+    })();
+  </script>
+</body>
+</html>
